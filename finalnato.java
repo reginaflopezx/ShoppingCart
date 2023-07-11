@@ -106,7 +106,7 @@ public class finalnato extends JFrame implements ActionListener {
                 } 
                 else{
                     dispose();
-                    // new CheckOut;
+                    // new CheckOut();
                 }
             }
         });
