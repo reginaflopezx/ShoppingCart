@@ -98,7 +98,18 @@ public class finalnato extends JFrame implements ActionListener {
         
         btnCheckOut = new JButton("CHECKOUT");
         btnCheckOut.setFont(new Font("Arial", Font.BOLD, 13));
-        btnCheckOut.addActionListener(this);
+        btnCheckOut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (itemTextArea.getText().isEmpty() && priceTextArea.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Cart is empty. Please add items to the cart.");
+                } 
+                else{
+                    dispose();
+                    // new CheckOut;
+                }
+            }
+        });
 
         btnBackToHp = new JButton("BACK TO HOMEPAGE");
         btnBackToHp.setFont(new Font("Arial", Font.BOLD, 13));
@@ -176,15 +187,9 @@ public class finalnato extends JFrame implements ActionListener {
     	setVisible(true);
     }
 
-
     public void actionPerformed(ActionEvent e)
     {
-       if (e.getSource() == btnCheckOut){
-        dispose();
-        // new CheckOut();
-       }
-
-       else if(e.getSource() == btnBackToHp){
+       if(e.getSource() == btnBackToHp){
         dispose();
         // new Homepage();
        } 
