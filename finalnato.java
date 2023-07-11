@@ -58,7 +58,7 @@ public class finalnato extends JFrame implements ActionListener {
     	pricePanel.setLayout(new GridLayout(0,1));
         pricePanel.setBackground(Color.WHITE);
         JTextArea priceTextArea = new JTextArea();
-        Font priceFont = new Font("Calibri", Font.PLAIN, 18); // Specify the desired font and size
+        Font priceFont = new Font("Calibri", Font.PLAIN, 16); // Specify the desired font and size
             priceTextArea.setFont(priceFont);
         // priceTextArea.setEditable(false);
         JScrollPane priceScrollPane = new JScrollPane(priceTextArea);
