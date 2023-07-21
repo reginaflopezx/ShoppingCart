@@ -1,10 +1,16 @@
 package shophomepage;
 
+import java.sql.*;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,13 +21,16 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class CheckOut extends JFrame implements ActionListener {
+    
+
+
     private String clothingName;
     private int clothingPrice;
     public JTextField txtname, txtaddress, txtmobile, txttotal, txtclothingname;
-    private JButton back, pay;
-    private JLabel name, address, mobile, title, total;
-    private JPanel panel1;
-    private JScrollPane jspane2;
+    private final JButton back, pay;
+    private final JLabel name, address, mobile, title, total;
+    private final JPanel panel1;
+    private final JScrollPane jspane2;
     public JTextArea summ;
 
     public CheckOut(String clothingName, int clothingPrice) {
@@ -179,6 +188,8 @@ public class CheckOut extends JFrame implements ActionListener {
         showSelectedClothing();
     }
 
+  
+
     private void showSelectedClothing() {
         txttotal.setText(String.valueOf(clothingPrice));
 
@@ -192,6 +203,66 @@ public class CheckOut extends JFrame implements ActionListener {
     public void setClothingPrice(int price) {
         this.clothingPrice = price;
     }
+    
+    
+     private void SqlDatabase() {
+    // Get the customer details from the text fields
+    String customerName = txtclothingname.getText();
+    String customerAddress = txtaddress.getText();
+    String mobileNumber = txtmobile.getText();
+
+    // Check if any of the customer details are empty
+    if (customerName.isEmpty() || customerAddress.isEmpty() || mobileNumber.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please fill in all the customer details.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Validate the mobile number format (11 digits)
+    if (!mobileNumber.matches("\\d{11}")) {
+        JOptionPane.showMessageDialog(this, "Mobile number should contain exactly 11 digits.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    try {
+        // Establish a database connection
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/onlineshopping","root","");
+
+        // Prepare the SQL statement for inserting data
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO olshop (clothingName, clothingPrice, customerName, customerAddress, mobileNumber) VALUES (?, ?, ?, ?, ?)");
+        stmt.setString(1, clothingName);
+        stmt.setInt(2, clothingPrice);
+        stmt.setString(3, customerName);
+        stmt.setString(4, customerAddress);
+        stmt.setString(5, mobileNumber);
+
+        // Execute the insert statement
+        int rowsAffected = stmt.executeUpdate();
+
+        if (rowsAffected > 0) {
+            // Show a success message
+            JOptionPane.showMessageDialog(this, "Order placed successfully!", "Payment", JOptionPane.PLAIN_MESSAGE);
+            // Clear the text fields
+            txtclothingname.setText("");
+            txtaddress.setText("");
+            txtmobile.setText("");
+        } else {
+            // Show an error message if the insert was not successful
+            JOptionPane.showMessageDialog(this, "Error while saving the order. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Close the database resources
+        stmt.close();
+        conn.close();
+
+    }   catch (ClassNotFoundException ex) {
+            Logger.getLogger(CheckOut.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(CheckOut.class.getName()).log(Level.SEVERE, null, ex);
+        }
+}
+
+
 
   @Override
 public void actionPerformed(ActionEvent e) {
@@ -208,11 +279,29 @@ public void actionPerformed(ActionEvent e) {
             JOptionPane.showMessageDialog(CheckOut.this, "Mobile number should contain exactly 11 digits", "Error", JOptionPane.ERROR_MESSAGE);
         } else {
             // All fields are filled and txtmobile contains exactly 11 digits, place the order
+            SqlDatabase(); // Call the method to save the order details to the database (text file)
+            // Write the items and prices to a text file
+            String fileName = "OrderDetails.txt";
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+                // Write the selected clothing information to the file
+                writer.write(clothingName + "\t\t" + clothingPrice);
+                writer.newLine();
+
+                // Optionally, you can write more information if needed
+                // writer.write("More information...");
+                // writer.newLine();
+
+                // Flush and close the writer
+                writer.flush();
+            } catch (IOException ex) {
+                ex.printStackTrace(); // Handle or log the exception appropriately
+            }
+        }
             dispose();
             new Homepage();
             JOptionPane.showMessageDialog(CheckOut.this, "Thank you for purchasing our product!",
                     "Payment", JOptionPane.PLAIN_MESSAGE);
         }
     }
-}
 }
