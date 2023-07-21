@@ -139,13 +139,9 @@ public class shoppingCart extends JFrame implements ActionListener {
         add(buttonPanel, BorderLayout.SOUTH);
 
         setVisible(true);
-
         loadCartItems();
 
     }
-
-    // ... (the rest of the class remains unchanged)
-
 
     private void loadCartItems() {
         try {
@@ -168,7 +164,7 @@ public class shoppingCart extends JFrame implements ActionListener {
             ex.printStackTrace();
         }
     }
- // Update the removeFromCart method to remove selected item from the cart
+
     private void removeFromCart(String item) {
         String currentItems = itemTextArea.getText();
         String currentPrices = priceTextArea.getText();
@@ -192,7 +188,6 @@ public class shoppingCart extends JFrame implements ActionListener {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("cart.txt"));
             for (int i = 0; i < updatedItems.length(); i++) {
-                // Using "tab" as a delimiter between item and price when writing to the file
                 writer.write(updatedItems.toString().split("\n")[i] + ":" + updatedPrices.toString().split("\n")[i]);
                 writer.newLine();
             }
@@ -202,11 +197,23 @@ public class shoppingCart extends JFrame implements ActionListener {
         }
     }
 
-    // Update the actionPerformed method for btnRemoveItem
     @Override
-public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
     if (e.getSource() == btnCheckOut) {
-        // Get the selected clothing name and price
+        checkoutItem();
+    } else if (e.getSource() == btnBackToHp) {
+        dispose();
+        new Homepage().setVisible(true);
+    } else if (e.getSource() == btnRemoveItem) {
+        String selectedText = itemTextArea.getSelectedText();
+        if (selectedText != null) {
+            removeFromCart(selectedText);
+        }
+    } else if (e.getSource() == btnTotal) {
+        calculateTotal();
+    }
+}
+    private void checkoutItem(){
         String selectedText = itemTextArea.getSelectedText();
         String[] items = itemTextArea.getText().split("\n");
         String[] prices = priceTextArea.getText().split("\n");
@@ -218,20 +225,15 @@ public void actionPerformed(ActionEvent e) {
                 break;
             }
         }
-    
-        // If a valid item is selected, proceed to CheckOut
         if (selectedIdx != -1) {
             String selectedClothingName = items[selectedIdx];
             int selectedClothingPrice = Integer.parseInt(prices[selectedIdx]);
-    
-            // Create an instance of the CheckOut class and pass the clothing details
+  
             CheckOut checkOutFrame = new CheckOut(selectedClothingName, selectedClothingPrice);
     
-            // Remove the selected item and price from the text areas
             items[selectedIdx] = "";
             prices[selectedIdx] = "";
     
-            // Update the text areas with the new content
             StringBuilder updatedItems = new StringBuilder();
             StringBuilder updatedPrices = new StringBuilder();
             for (int i = 0; i < items.length; i++) {
@@ -244,16 +246,13 @@ public void actionPerformed(ActionEvent e) {
                     }
                 }
             }
-    
-            // Set the updated content back to the text areas
+
             itemTextArea.setText(updatedItems.toString());
             priceTextArea.setText(updatedPrices.toString());
     
-            // Save the updated items and prices to a file
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter("cart.txt"));
                 for (int i = 0; i < updatedItems.length(); i++) {
-                    // Using "tab" as a delimiter between item and price when writing to the file
                     writer.write(updatedItems.toString().split("\n")[i] + ":" + updatedPrices.toString().split("\n")[i]);
                     writer.newLine();
                 }
@@ -261,27 +260,11 @@ public void actionPerformed(ActionEvent e) {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-    
-            dispose(); // Close the shoppingCart frame
+        dispose();
         } else {
             JOptionPane.showMessageDialog(this, "Please highlight the item to select from the cart.", "Error", JOptionPane.ERROR_MESSAGE);
         }
-    
-    
-
-    } else if (e.getSource() == btnBackToHp) {
-        dispose();
-        new Homepage().setVisible(true); // Show the Homepage window
-    } else if (e.getSource() == btnRemoveItem) {
-        String selectedText = itemTextArea.getSelectedText();
-        if (selectedText != null) {
-            removeFromCart(selectedText);
-        }
-    } else if (e.getSource() == btnTotal) {
-        calculateTotal();
     }
-}
-    
     private void calculateTotal() {
         String[] items = itemTextArea.getText().split("\n");
         String[] prices = priceTextArea.getText().split("\n");
@@ -295,10 +278,8 @@ public void actionPerformed(ActionEvent e) {
                 double itemPrice = Double.parseDouble(prices[i]);
                 total += itemPrice;
             } catch (NumberFormatException ex) {
-                // Ignore any non-numeric price values
             }
         }
-
         totalArea.setText(receiptBuilder.toString());
         totalLabel.setText("Total: P" + String.format("%.2f", total));
     }
